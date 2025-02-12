@@ -1,0 +1,38 @@
+{
+    "name": "kegjs",
+    "version": "0.0.1",
+    "description": "",
+    "type": "module",
+    "bin": {
+        "kegjs": "./dist/cli/cli.js"
+    },
+    "exports": {
+        "./*": {
+            "types": "./dist/*/*.d.ts",
+            "import": "./dist/*/*.js",
+            "require": "./dist/*/*.cjs",
+            "default": "./dist/*/*.js"
+        }
+    },
+    "scripts": {
+        "lint": "biome lint --write",
+        "format": "biome format --write",
+        "check": "biome check --write",
+        "build": "tsup && cp -r src/templates dist/templates"
+    },
+    "dependencies": {
+        "@swc/core": "^1.10.15",
+        "chalk": "^5.4.1",
+        "commander": "^13.1.0",
+        "cosmiconfig": "^9.0.0",
+        "eta": "^3.5.0",
+        "glob": "^11.0.1"
+    },
+    "devDependencies": {
+        "@biomejs/biome": "1.9.4",
+        "@types/bun": "^1.2.2",
+        "tsup": "^8.3.6",
+        "typescript": "^5.5.3"
+    },
+    "private": true
+}

@@ -1,0 +1,19 @@
+/* THIS IS A GENERATED FILE, ANY MODIFICATIONS WILL BE OVERWRITTEN WITH THE NEW GENERATION */
+
+import { Keg } from '../keg';
+
+<% it.imports.forEach(function(im){ %>
+import { <%= im.name %> } from '<%= im.path %>';
+<% }) %>
+
+export function initializeContainer() {
+    const container = Keg.getInstance();
+
+<% it.registers.forEach(function(register){ %>
+<% if (register.type === "Class") { %>
+    container.register({ useClass: <%= register.name %>, tokens: [<%~ register.tokens %>], deps: [<%~ register.deps %>] <% if(register.default){ %>, default: true <% } %>});
+<% } else {%>
+    container.register({ useFactory: <%= register.name %>, tokens: [<%~ register.tokens %>], deps: [<%~ register.deps %>] <% if(register.default){ %>, default: true <% } %>});
+<% }%>
+<% }) %>
+}
