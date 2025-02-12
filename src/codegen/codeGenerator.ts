@@ -1,6 +1,6 @@
 import path from "node:path";
-import { eta } from "./eta";
-import type { ParseResult, ParsedArgs } from "./parser";
+import { eta } from "./eta.js";
+import type { ParseResult, ParsedArgs } from "./parser.js";
 
 export class CodeGenerator {
     getDependencies(args: ParsedArgs[]): { qualifier: string; type: string }[] {

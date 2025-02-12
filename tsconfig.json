@@ -25,11 +25,7 @@
         // "noPropertyAccessFromIndexSignature": true,
 
         "experimentalDecorators": true,
-        "declaration": true,
-
-        "paths": {
-            "@kegjs": ["./src"]
-        }
+        "declaration": true
     },
     "include": ["src", "test"]
 }

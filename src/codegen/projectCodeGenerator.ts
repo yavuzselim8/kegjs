@@ -1,11 +1,13 @@
 import path from "node:path";
-import { CodeGenerator } from "./codeGenerator";
-import { FileScanner } from "./fileScanner";
-import { type ParseResult, parseSource } from "./parser";
+import { CodeGenerator } from "./codeGenerator.js";
+import { FileScanner } from "./fileScanner.js";
+import { type ParseResult, parseSource } from "./parser.js";
+import { writeFile, type Runtime } from "../utils/io.js";
 
 interface GeneratorConfig {
     srcDir: string;
     outDir: string;
+    runtime: Runtime;
 }
 
 export class ProjectCodeGenerator {
@@ -15,6 +17,7 @@ export class ProjectCodeGenerator {
 
     constructor(private config: GeneratorConfig) {
         this.fileScanner = new FileScanner({
+            runtime: this.config.runtime,
             srcDir: path.resolve(process.cwd(), config.srcDir),
         });
 
@@ -121,7 +124,8 @@ export class ProjectCodeGenerator {
                 throw new Error(
                     `Multiple default instances found for ${token}`,
                 );
-            } else if (instances.length > 1 && defaultInstances.length === 0) {
+            }
+            if (instances.length > 1 && defaultInstances.length === 0) {
                 throw new Error(
                     `No default instances found for ${token}. It has ${instances.length} instances`,
                 );
@@ -204,7 +208,7 @@ export class ProjectCodeGenerator {
             this.config.outDir,
         );
 
-        await Bun.write(containerPath, containerContent);
+        await writeFile(containerPath, containerContent, this.config.runtime);
     }
 
     private async parseAllFiles(

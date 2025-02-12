@@ -1,19 +1,22 @@
 import { glob } from "glob";
+import { readFileAsText, type Runtime } from "../utils/io.js";
 
 interface ScanOptions {
     srcDir: string;
+    runtime: Runtime;
     pattern: string | string[];
     ignore: string[];
 }
 
 interface FileScannerOptions {
     srcDir: string;
+    runtime: Runtime;
     pattern?: string | string[];
     ignore?: string[];
 }
 
 export class FileScanner {
-    options: ScanOptions
+    options: ScanOptions;
 
     constructor(options: FileScannerOptions) {
         this.options = {
@@ -25,7 +28,7 @@ export class FileScanner {
                 "**/generated/**",
             ],
             ...options,
-        }
+        };
     }
 
     async scanFiles(): Promise<Map<string, string>> {
@@ -38,7 +41,7 @@ export class FileScanner {
         const sourceFiles = new Map<string, string>();
 
         for (const file of files) {
-            const content = await Bun.file(file).text();
+            const content = await readFileAsText(file, this.options.runtime);
             sourceFiles.set(file, content);
         }
 

@@ -1,3 +1,3 @@
-import { Service } from "./service";
+import { Service } from "./service.js";
 
 export const Component = Service;

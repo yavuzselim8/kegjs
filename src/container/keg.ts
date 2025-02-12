@@ -1,4 +1,4 @@
-import type { ProviderOptions, Token } from "./types";
+import type { ProviderOptions, Token } from "./types.js";
 
 type InstanceContainer = {
     instance: any;

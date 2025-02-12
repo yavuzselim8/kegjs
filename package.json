@@ -1,24 +1,37 @@
 {
+    "type": "module",
     "name": "kegjs",
     "version": "0.0.1",
-    "description": "",
-    "type": "module",
+    "description": "Powerful DI without Reflection For TS/JS",
+    "author": "Yavuz Tasci",
     "bin": {
         "kegjs": "./dist/cli/cli.js"
     },
     "exports": {
-        "./*": {
-            "types": "./dist/*/*.d.ts",
-            "import": "./dist/*/*.js",
-            "require": "./dist/*/*.cjs",
-            "default": "./dist/*/*.js"
+        "./decorators/*": {
+            "types": "./dist/decorators/*.d.ts",
+            "import": "./dist/decorators/*.js",
+            "require": "./dist/decorators/*.cjs",
+            "default": "./dist/decorators/*.js"
+        },
+        "./cli/*": {
+            "types": "./dist/cli/*.d.ts",
+            "import": "./dist/cli/*.js",
+            "require": "./dist/cli/*.cjs",
+            "default": "./dist/cli/*.js"
+        },
+        "./container/*": {
+            "types": "./dist/container/*.d.ts",
+            "import": "./dist/container/*.js",
+            "require": "./dist/container/*.cjs",
+            "default": "./dist/container/*.js"
         }
     },
     "scripts": {
         "lint": "biome lint --write",
         "format": "biome format --write",
         "check": "biome check --write",
-        "build": "tsup && cp -r src/templates dist/templates"
+        "build": "tsup && cp -r src/templates dist"
     },
     "dependencies": {
         "@swc/core": "^1.10.15",
@@ -34,5 +47,9 @@
         "tsup": "^8.3.6",
         "typescript": "^5.5.3"
     },
-    "private": true
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/yavuzselim8/kegjs"
+    }
 }

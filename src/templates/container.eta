@@ -1,6 +1,6 @@
 /* THIS IS A GENERATED FILE, ANY MODIFICATIONS WILL BE OVERWRITTEN WITH THE NEW GENERATION */
 
-import { Keg } from '../keg';
+import { Keg } from 'kegjs/container/keg';
 
 <% it.imports.forEach(function(im){ %>
 import { <%= im.name %> } from '<%= im.path %>';
