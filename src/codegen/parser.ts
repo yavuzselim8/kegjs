@@ -19,6 +19,7 @@ import type {
     TsTypeAnnotation,
     TsTypeReference,
 } from "@swc/core";
+import chalk from "chalk";
 
 export interface ParseResult {
     classes: ParsedClass[];
@@ -262,7 +263,8 @@ function extractTypeFromTypeAnnotation(
             case "TsArrayType":
                 return extractTypeFromArrayType(annotation.typeAnnotation);
             default:
-                throw Error();
+                console.warn(chalk.yellow(`Unknown type annotation type ${annotation.typeAnnotation.type} . `));
+                return undefined;
         }
     }
     return undefined;
@@ -392,4 +394,4 @@ async function parseCode() {
     console.log(JSON.stringify(parsed));
 }
 
-// await parseCode();
+await parseCode();

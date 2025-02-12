@@ -27,6 +27,7 @@
             "default": "./dist/container/*.js"
         }
     },
+    "files": ["dist"],
     "scripts": {
         "lint": "biome lint --write",
         "format": "biome format --write",
