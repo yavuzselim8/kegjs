@@ -191,12 +191,17 @@ export function parseClass(node: ClassDeclaration): ParsedClass | undefined {
         }
     }
 
+    let methods: ParsedMethod[] = [];
+    if (type === "Provider") {
+        methods = extractMethods(node.body);
+    }
+
     return {
         type: "Class",
         decoratedType: type!,
         decorators: decorators,
         name: node.identifier.value,
-        methods: extractMethods(node.body),
+        methods: methods,
         implements: extractImplements(node.implements),
         constructors: extractConstructor(node.body),
     };
@@ -393,5 +398,3 @@ async function parseCode() {
     const parsed = await parseSource(source);
     console.log(JSON.stringify(parsed));
 }
-
-await parseCode();
