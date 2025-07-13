@@ -1,7 +1,7 @@
 {
     "type": "module",
     "name": "kegjs",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "description": "Powerful DI without Reflection For TS/JS",
     "author": "Yavuz Tasci",
     "bin": {
