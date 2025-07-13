@@ -34,6 +34,7 @@ export class CodeGenerator {
                 deps: string;
                 type: "Class" | "Factory";
                 default: boolean;
+                transient: boolean;
             }[];
         } = {
             imports: [],
@@ -80,6 +81,9 @@ export class CodeGenerator {
                             type: "Factory",
                             name: `${parsedClass.name}.${method.name}`,
                             deps: depsString,
+                            transient: method.decorators.filter(
+                                (d) => d.name === "Transient",
+                            ).length > 0,
                         });
                     }
                 } else {
@@ -112,6 +116,9 @@ export class CodeGenerator {
                                 : "Class",
                         name: parsedClass.name,
                         deps: depsString,
+                        transient: parsedClass.decorators.filter(
+                            (d) => d.name === "Transient",
+                        ).length > 0,
                     });
                 }
             }

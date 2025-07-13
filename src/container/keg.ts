@@ -1,18 +1,35 @@
-import type { ProviderOptions, Token } from "./types.js";
+import type { Constructor, ProviderOptions, Token} from "./types.js";
 
-type InstanceContainer = {
-    instance: any;
-    isDefault: boolean;
-};
 
-interface RegistryEntry<T> extends ProviderOptions<T> {
-    provided?: boolean;
+class RegistryEntry<T> implements ProviderOptions<T> {
+    tokens: string[];
+    useClass?: Constructor<T> | undefined;
+    useValue?: T | undefined;
+    useFactory?: ((...args: any[]) => T) | undefined;
+    deps?: string[] | undefined;
+    default?: boolean | undefined;
+    instance?: T;
+    transient?: boolean;
+
+    constructor(provider: ProviderOptions<T>) {
+        this.tokens = provider.tokens;
+        this.useClass = provider.useClass;
+        this.useValue = provider.useValue;
+        this.useFactory = provider.useFactory;
+        this.deps = provider.deps;
+        this.default = provider.default;
+        this.transient = provider.transient;
+    }
+}
+
+interface TokenRegistry<T> {
+    entries: RegistryEntry<T>[];
+    default?: RegistryEntry<T>
 }
 
 export class Keg {
-    private static container: Keg;
-    private registry = new Map<Token, RegistryEntry<any>[]>();
-    private instances = new Map<Token, InstanceContainer[]>();
+    protected static container?: Keg = undefined;
+    protected registry = new Map<Token, TokenRegistry<any>>();
 
     static getInstance(): Keg {
         if (!Keg.container) {
@@ -22,111 +39,98 @@ export class Keg {
     }
 
     register<T>(provider: ProviderOptions<T>): void {
+        const registryEntry = new RegistryEntry(provider);
+        console.log("Registering provider");
+        console.log(registryEntry)
         for (const token of provider.tokens) {
             if (!this.registry.has(token)) {
-                this.registry.set(token, []);
+                this.registry.set(token, { entries: [] });
             }
 
-            this.registry.get(token)!.push(provider);
+            const tokenRegistry = this.registry.get(token)!;
+
+            tokenRegistry.entries.push(registryEntry);
+
+            if (provider.default) {
+                if (tokenRegistry.default) {
+                    throw new Error(
+                        `Multiple default providers registered for ${token}`,
+                    );
+                }
+                tokenRegistry.default = registryEntry;
+            }
+            console.log(this.registry.get(token))
         }
     }
 
     resolveMultiple<T>(token: string, mustResolve = false): T[] {
-        if (
-            this.instances.has(token) &&
-            this.instances.get(token)!.length ===
-                this.registry.get(token)!.length
-        ) {
-            return this.instances
+        if (this.registry.has(token)) {
+            return this.registry
                 .get(token)!
-                .map((instance) => instance.instance);
-        }
-        if (mustResolve) {
-            throw new Error(`Not all providers for ${token} can be resolved`);
+                .entries
+                .map((registryEntry) => this.getRegistryEntryInstance(registryEntry));
         }
 
-        this.populateInstances(token);
-
-        return this.resolveMultiple(token, true);
+        throw new Error(`No provider found for ${token}`)
     }
 
-    resolveOne<T>(token: string, mustResolve = false): T {
-        if (
-            this.instances.has(token) &&
-            this.instances.get(token)!.length ===
-                this.registry.get(token)!.length
-        ) {
-            if (this.instances.get(token)!.length === 1) {
-                return this.instances.get(token)![0].instance;
-            }
-
-            const defaultInstance = this.instances
-                .get(token)!
-                .filter((instance) => instance.isDefault);
-
-            if (defaultInstance.length > 1) {
-                throw new Error(
-                    `Multiple default instances found for ${token}`,
-                );
-            } else if (defaultInstance.length === 0) {
-                throw new Error(`No default instances found for ${token}`);
-            }
-
-            return defaultInstance[0].instance;
+    resolveOne<T>(token: string): T {
+        console.log("Resolving")
+        for(const key of this.registry.keys()){
+            console.log(key);
         }
-        if (mustResolve) {
-            throw new Error(`Not all providers for ${token} can be resolved`);
-        }
-
-        this.populateInstances(token);
-
-        return this.resolveOne(token, true);
-    }
-
-    private populateInstances<T>(token: string) {
-        const providers = this.registry.get(token);
-
-        if (!providers) {
+        if (!this.registry.has(token)) {
             throw new Error(`No provider found for ${token}`);
         }
+        const tokenRegistry = this.registry.get(token)!;
 
-        for (const provider of providers) {
-            if (provider.provided) {
-                continue;
-            }
-
-            this.createInstance(provider);
+        if (tokenRegistry.default) {
+            return this.getRegistryEntryInstance(tokenRegistry.default);
         }
-    }
 
-    private createInstance<T>(provider: RegistryEntry<T>) {
-        let instance: T;
-
-        if (provider.useValue) {
-            instance = provider.useValue;
-        } else if (provider.useFactory) {
-            const deps = (provider.deps || []).map((dep) => this.resolve(dep));
-            instance = provider.useFactory(...deps);
-        } else if (provider.useClass) {
-            const deps = (provider.deps || []).map((dep) => this.resolve(dep));
-            instance = new provider.useClass(...deps);
-        } else {
+        if (tokenRegistry.entries.length > 1) {
             throw new Error(
-                `Invalid provider configuration for ${provider.tokens.join(", ")}`,
+                `Multiple providers registered for ${token} without a default`,
             );
         }
 
-        for (const token of provider.tokens) {
-            if (!this.instances.has(token)) {
-                this.instances.set(token, []);
-            }
+        return this.getRegistryEntryInstance(tokenRegistry.entries[0]);
+    }
 
-            this.instances
-                .get(token)!
-                .push({ instance, isDefault: provider.default || false });
+    protected getRegistryEntryInstance<T>(registryEntry: RegistryEntry<T>): T {
+        if (registryEntry.instance) {
+            return registryEntry.instance;
         }
 
-        provider.provided = true;
+        return this.createRegistryEntryInstance(registryEntry);
+    }
+
+    protected createRegistryEntryInstance<T>(registryEntry: RegistryEntry<T>): T {
+        let instance: T;
+
+        if (registryEntry.useValue) {
+            instance = registryEntry.useValue;
+        } else if (registryEntry.useFactory) {
+            const deps = (registryEntry.deps || []).map((dep) => this.resolve(dep));
+            instance = registryEntry.useFactory(...deps);
+        } else if (registryEntry.useClass) {
+            const deps = (registryEntry.deps || []).map((dep) => this.resolve(dep));
+            instance = new registryEntry.useClass(...deps);
+        } else {
+            throw new Error(
+                `Invalid provider configuration for ${registryEntry.tokens.join(", ")}`,
+            );
+        }
+
+        this.cacheInstance(registryEntry, instance);
+
+        return instance;
+    }
+
+    protected cacheInstance<T>(registryEntry: RegistryEntry<T>, instance: T): void {
+        if (!registryEntry.transient) {
+            registryEntry.instance = instance;
+        }
     }
 
     resolve<T>(token: string): T | T[] {
@@ -143,6 +147,12 @@ export class Keg {
 
     clearRegistry() {
         this.registry.clear();
-        this.instances.clear();
+    }
+}
+
+export class TestKeg extends Keg {
+
+    protected cacheInstance<T>(registryEntry: RegistryEntry<T>, instance: T) {
+        return;
     }
 }

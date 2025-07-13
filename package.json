@@ -32,7 +32,10 @@
         "lint": "biome lint --write",
         "format": "biome format --write",
         "check": "biome check --write",
-        "build": "tsup && cp -r src/templates dist"
+        "build": "tsup && cp -r src/templates dist",
+        "generate": "bun dist/cli/cli.js generate",
+        "generate-for-test": "cd test && bun ../dist/cli/cli.js generate",
+        "test": "bun test --preload ./test/test-setup.ts"
     },
     "dependencies": {
         "@swc/core": "^1.10.15",

@@ -6,6 +6,7 @@ export interface ProviderOptions<T> {
     useFactory?: (...args: any[]) => T;
     deps?: string[];
     default?: boolean;
+    transient?: boolean;
 }
 
 export type Constructor<T = any> = new (...args: any[]) => T;

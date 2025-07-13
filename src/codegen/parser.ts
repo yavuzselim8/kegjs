@@ -374,6 +374,7 @@ async function parseCode() {
     
     @Qualifier('UserController1')
     @Controller('/users')
+    @Transient
     export class UserController {
       @Get('/:id')
       async getUser(c: Context) {
@@ -382,6 +383,7 @@ async function parseCode() {
     }
     
     @Service
+    @Transient
     class UserService implements IUserService {
         constructor(private userRepository: UserRepository) {}
     }
@@ -398,3 +400,5 @@ async function parseCode() {
     const parsed = await parseSource(source);
     console.log(JSON.stringify(parsed));
 }
+
+parseCode();

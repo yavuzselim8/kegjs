@@ -11,9 +11,9 @@ export function initializeContainer() {
 
 <% it.registers.forEach(function(register){ %>
 <% if (register.type === "Class") { %>
-    container.register({ useClass: <%= register.name %>, tokens: [<%~ register.tokens %>], deps: [<%~ register.deps %>] <% if(register.default){ %>, default: true <% } %>});
+    container.register({ useClass: <%= register.name %>, tokens: [<%~ register.tokens %>], deps: [<%~ register.deps %>] <% if(register.default){ %>, default: true <% } %><% if(register.transient){ %>, transient: true <%}%>});
 <% } else {%>
-    container.register({ useFactory: <%= register.name %>, tokens: [<%~ register.tokens %>], deps: [<%~ register.deps %>] <% if(register.default){ %>, default: true <% } %>});
+    container.register({ useFactory: <%= register.name %>, tokens: [<%~ register.tokens %>], deps: [<%~ register.deps %>] <% if(register.default){ %>, default: true <% } %><% if(register.transient){ %>, transient: true <%}%>});
 <% }%>
 <% }) %>
 }
